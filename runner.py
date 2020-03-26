@@ -7,61 +7,51 @@ WIN_HEIGHT = 720
 win = pygame.display.set_mode((WIN_WIDTH, WIN_HEIGHT))
 pygame.display.set_caption("Runner")
 
-run = []
-slide = []
-jump = []
+slide = [pygame.transform.scale(pygame.image.load(f"assets/adventurer-slide-0{frame}.png"), (100, 74)) for frame in range(0, 2)]
+jump = [pygame.image.load(f"assets/adventurer-jump-0{frame}.png") for frame in range(0, 6)]
+run = [pygame.transform.scale(pygame.image.load(f"assets/adventurer-run-0{frame}.png"), (200, 148)) for frame in range(0, 6)]
 bg = pygame.image.load('assets/Background.png')
 bg = pygame.transform.scale(bg, (1280, 720))
 
-for i in range(0, 5):
-    run.append(pygame.image.load('assets/adventurer-run-0' + str(i) + '.png'))
-    jump.append(pygame.image.load('assets/adventurer-jump-0' + str(i) + '.png'))
-    if i < 2:
-        slide.append(pygame.image.load('assets/adventurer-slide-0' + str(i) + '.png'))
+clock = pygame.time.Clock()
 
-
-
-width = 50
-height = 37
-x = 0
-y = WIN_HEIGHT - height
+width = 200
+height = 148
+x = 300
+y = WIN_HEIGHT - height - 80
 vel = 20
 
 is_jump = False
-jump_count = 5
+jump_count = 8
 
-walk_count = 0
+distance = 0
 
 is_slide = False
 
+run_count = 0
+
 def redraw_game_window():
-    global walk_count
+    global run_count
     win.blit(bg, (0,0))
+    if run_count + 1 >= 18:
+        run_count = 0
+    win.blit(run[run_count//3], (x,y))
+    run_count += 1
     pygame.display.update()
 
 
-run = True
-while run:
-    pygame.time.delay(50)
+running = True
+while running:
+    clock.tick(30)
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
-            run = False
+            running = False
     
     keys = pygame.key.get_pressed()
-    if keys[pygame.K_LEFT]:
-        if x < vel:
-            x = 0
-        else:
-            x -= vel
-    if keys[pygame.K_RIGHT]:
-        if x > WIN_WIDTH - width - vel:
-            x = WIN_WIDTH - width
-        else: 
-            x += vel
     if not(is_jump) and keys[pygame.K_SPACE]:
         is_jump = True
     elif is_jump:
-        if jump_count >= -5:
+        if jump_count >= -8:
             neg = 1
             if(jump_count < 0):
                 neg = -1
@@ -69,7 +59,7 @@ while run:
             jump_count -= 1
         else:
             is_jump = False
-            jump_count = 5
+            jump_count = 8
     redraw_game_window()
 
 pygame.quit()
