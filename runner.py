@@ -34,24 +34,24 @@ class player(object):
         self.run_frame = 0
         self.jump_frame = 0
         self.slide_frame = 0
-        self.hitbox = (self.x + 80, self.y + 30, 90, 115)
+        self.hitbox = pygame.Rect(self.x + 80, self.y + 30, 70, 115)
 
     def draw(self, win):
         if self.is_run: 
-            self.hitbox = (self.x + 80, self.y + 30, 70, 115)
+            self.hitbox = pygame.Rect(self.x + 80, self.y + 30, 70, 115)
             if self.run_frame + 1 >= 18:
                 self.run_frame = 0
             win.blit(run[self.run_frame // 3], (self.x, self.y))
             self.run_frame += 1
         if self.is_jump:
-            self.hitbox = (self.x + 80, self.y + 30, 70, 100)
+            self.hitbox = pygame.Rect(self.x + 80, self.y + 30, 70, 100)
             if self.jump_frame + 1 >= 18:
                 self.jump_frame = 0
             win.blit(jump[self.jump_frame // 5], (self.x, self.y))
             self.jump_frame += 1
             self.run_frame = 0
         if self.is_slide:
-            self.hitbox = (self.x + 50, self.y + 80, 95, 60)
+            self.hitbox = pygame.Rect(self.x + 80, self.y + 80, 65, 60)
             if self.slide_frame + 1 >= 6:
                 self.slide_frame = 0
             win.blit(slide[self.slide_frame // 3], (self.x, self.y))
@@ -59,16 +59,25 @@ class player(object):
             self.run_frame = 0
 
 class obstacle(object):
-    def __init__(self, x, y, width, height, obst):
+    def __init__(self, x, y, width, height, name, obst):
         self.x = x
         self.y = y
         self.width = width
         self.height = height
+        self.name = name
         self.obst = obst
+        if self.name == "axe":
+            self.hitbox = pygame.Rect(self.x + 10, self.y + 10, 45, 45)
+        else:
+            self.hitbox = pygame.Rect(self.x, self.y, 100, 75)
 
     def draw(self, win):
+        if self.name == "axe":
+            self.hitbox = pygame.Rect(self.x + 10, self.y + 10, 45, 45)
+        else:
+            self.hitbox = pygame.Rect(self.x, self.y, 100, 75)
         win.blit(self.obst, (self.x, self.y))
-
+        obstacle_hitboxes.append(self.hitbox)
 
 def redraw_game_window():
     win.blit(bg, (bg_x, 0))
@@ -82,7 +91,8 @@ def redraw_game_window():
 running = True
 char = player(300, WIN_HEIGHT - 228, 200, 148)
 obstacles = []
-pygame.time.set_timer(pygame.USEREVENT+2, random.randrange(610, 1000))
+obstacle_hitboxes = []
+pygame.time.set_timer(pygame.USEREVENT+2, random.randrange(650, 1000))
 while running:
     #frame rate
     clock.tick(30)
@@ -115,10 +125,14 @@ while running:
         elif event.type == pygame.USEREVENT+2:
             rand = random.randint(0, 1)
             if rand == 0:
-                obstacles.append(obstacle(WIN_WIDTH, WIN_HEIGHT - 139, 60, 59, axe))
+                obstacles.append(obstacle(WIN_WIDTH, WIN_HEIGHT - 139, 60, 59, "axe", axe))
             else:
-                obstacles.append(obstacle(WIN_WIDTH, WIN_HEIGHT - 239, 60, 59, sign))
+                obstacles.append(obstacle(WIN_WIDTH, WIN_HEIGHT - 239, 100, 157, "sign", sign))
 
+    if(char.hitbox.collidelist(obstacle_hitboxes) != -1):
+        print("yikes")
+
+    obstacle_hitboxes.clear()
 
     for obst in obstacles:
         obst.x -= 10
