@@ -12,6 +12,8 @@ jump = [pygame.transform.scale(pygame.image.load(f"assets/adventurer-jump-0{fram
 run = [pygame.transform.scale(pygame.image.load(f"assets/adventurer-run-0{frame}.png"), (200, 148)) for frame in range(0, 6)]
 bg = pygame.image.load('assets/Background.png')
 bg = pygame.transform.scale(bg, (1280, 720))
+bg_x = 0
+bg_x2 = bg.get_width()
 
 clock = pygame.time.Clock()
 
@@ -50,7 +52,8 @@ class player(object):
 
 
 def redraw_game_window():
-    win.blit(bg, (0,0))
+    win.blit(bg, (bg_x, 0))
+    win.blit(bg, (bg_x2, 0))
     char.draw(win)
     pygame.display.update()
 
@@ -59,6 +62,12 @@ running = True
 char = player(300, WIN_HEIGHT - 228, 200, 148)
 while running:
     clock.tick(30)
+    bg_x -= 5
+    bg_x2 -= 5
+    if bg_x < bg.get_width() * -1:
+        bg_x = bg.get_width()
+    if bg_x2 < bg.get_width() * -1:
+        bg_x2 = bg.get_width()
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
