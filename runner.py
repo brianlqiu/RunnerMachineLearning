@@ -121,7 +121,7 @@ def eval_genomes(genomes, config):
     global GEN
     GEN += 1
     running = True
-    pygame.time.set_timer(pygame.USEREVENT, random.randrange(1000, 1200))
+    pygame.time.set_timer(pygame.USEREVENT, random.randrange(1400, 1500))
     distance = 0
 
     chars = []
@@ -164,8 +164,10 @@ def eval_genomes(genomes, config):
             for i, char in enumerate(chars):
                 if char.is_jump and abs(obstacles[nearest_obstacle_ind].hitbox.centerx - char.hitbox.centerx) >= 150:
                     ge[i].fitness -= 1
+                    #print(str(i) + ": " + str(ge[i].fitness))
                 elif char.is_jump and abs(obstacles[nearest_obstacle_ind].hitbox.centerx - char.hitbox.centerx) <= 150:
-                    ge[i].fitness += 2
+                    ge[i].fitness += 1
+                    #print(str(i) + ": " + str(ge[i].fitness))
                 else:
                     ge[i].fitness += 0.1
 
@@ -173,6 +175,8 @@ def eval_genomes(genomes, config):
                 output = nets[i].activate((obstacles[nearest_obstacle_ind].hitbox.centerx - char.hitbox.centerx, abs(obstacles[nearest_obstacle_ind].hitbox.centery - char.hitbox.centery)))
                 if output[0] > 0.5:
                     char.jump()
+                    if obstacles[nearest_obstacle_ind].hitbox.centerx - char.hitbox.centerx < 50:
+                        ge[i].fitness += 1
 
         #exit & slide end listeners
         for event in pygame.event.get():
