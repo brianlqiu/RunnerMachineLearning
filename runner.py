@@ -7,15 +7,38 @@ WIN_HEIGHT = 720
 win = pygame.display.set_mode((WIN_WIDTH, WIN_HEIGHT))
 pygame.display.set_caption("Runner")
 
+run = []
+slide = []
+jump = []
+bg = pygame.image.load('assets/Background.png')
+bg = pygame.transform.scale(bg, (1280, 720))
 
-width = 40
-height = 60
+for i in range(0, 5):
+    run.append(pygame.image.load('assets/adventurer-run-0' + str(i) + '.png'))
+    jump.append(pygame.image.load('assets/adventurer-jump-0' + str(i) + '.png'))
+    if i < 2:
+        slide.append(pygame.image.load('assets/adventurer-slide-0' + str(i) + '.png'))
+
+
+
+width = 50
+height = 37
 x = 0
 y = WIN_HEIGHT - height
 vel = 20
 
 is_jump = False
 jump_count = 5
+
+walk_count = 0
+
+is_slide = False
+
+def redraw_game_window():
+    global walk_count
+    win.blit(bg, (0,0))
+    pygame.display.update()
+
 
 run = True
 while run:
@@ -35,14 +58,6 @@ while run:
             x = WIN_WIDTH - width
         else: 
             x += vel
-    """
-    if keys[pygame.K_UP]:
-        if y < vel:
-            y = 0
-        else:
-            y -= vel
-    """
-    
     if not(is_jump) and keys[pygame.K_SPACE]:
         is_jump = True
     elif is_jump:
@@ -55,16 +70,6 @@ while run:
         else:
             is_jump = False
             jump_count = 5
-    """
-    if keys[pygame.K_DOWN]:
-        if y > WIN_HEIGHT - height - vel:
-            y = WIN_HEIGHT - height
-        else:
-            y += vel
-    """
-
-    win.fill((0, 0, 0))
-    pygame.draw.rect(win, (255, 0, 0), (x, y, width, height))
-    pygame.display.update()
+    redraw_game_window()
 
 pygame.quit()
