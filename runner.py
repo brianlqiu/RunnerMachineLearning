@@ -28,6 +28,7 @@ class player(object):
         self.distance = 0
         self.run_frame = 0
         self.jump_frame = 0
+        self.slide_frame = 0
 
     def draw(self, win):
         if self.is_run: 
@@ -40,14 +41,13 @@ class player(object):
                 self.jump_frame = 0
             win.blit(jump[self.jump_frame//3], (self.x, self.y))
             self.jump_frame += 1
+        if self.is_slide:
+            if self.slide_frame + 1 >= 6:
+                self.slide_frame = 0
+            win.blit(slide[self.slide_frame//3], (self.x, self.y))
+            self.slide_frame += 1
+        
 
-
-"""
-width = 200
-height = 148
-x = 300
-y = WIN_HEIGHT - height - 80
-"""
 
 def redraw_game_window():
     win.blit(bg, (0,0))
@@ -62,11 +62,15 @@ while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
+        elif event.type == pygame.KEYUP and char.is_slide:
+            char.is_slide = False
+            char.is_run = True
     
     keys = pygame.key.get_pressed()
     if not(char.is_jump) and keys[pygame.K_SPACE]:
         char.is_jump = True
         char.is_run = False
+        char.is_slide = False
     elif char.is_jump:
         if char.jump_count >= -8:
             neg = 1
@@ -78,6 +82,11 @@ while running:
             char.is_jump = False
             char.is_run = True
             char.jump_count = 8
+    if not(char.is_slide) and not(char.is_jump) and keys[pygame.K_DOWN]:
+        char.is_slide = True
+        char.is_jump = False   
+        char.is_run = False
+
     redraw_game_window()
 
 pygame.quit()
