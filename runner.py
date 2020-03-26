@@ -1,14 +1,18 @@
 import pygame
 pygame.init()
 
-win = pygame.display.set_mode((1280, 720))
+
+WIN_WIDTH = 1280
+WIN_HEIGHT = 720
+win = pygame.display.set_mode((WIN_WIDTH, WIN_HEIGHT))
 pygame.display.set_caption("Runner")
 
-x = 50
-y = 50
+
 width = 40
 height = 60
-vel = 5
+x = 0
+y = WIN_HEIGHT - height
+vel = 20
 
 run = True
 while run:
@@ -18,14 +22,27 @@ while run:
             run = False
     
     keys = pygame.key.get_pressed()
-    if keys[pygame.K_LEFT] and x > vel:
-        x -= vel
-    if keys[pygame.K_RIGHT] and x < win.get_width() - vel:
-        x += vel
-    if keys[pygame.K_UP] and y > vel:
-        y -= vel
-    if keys[pygame.K_DOWN] and y < win.get_height() - vel:
-        y += vel
+    if keys[pygame.K_LEFT]:
+        if x < vel:
+            x = 0
+        else:
+            x -= vel
+    if keys[pygame.K_RIGHT]:
+        if x > WIN_WIDTH - width - vel:
+            x = WIN_WIDTH - width
+        else: 
+            x += vel
+    if keys[pygame.K_UP]:
+        if y < vel:
+            y = 0
+        else:
+            y -= vel
+    if keys[pygame.K_DOWN]:
+        if y > WIN_HEIGHT - height - vel:
+            y = WIN_HEIGHT - height
+        else:
+            y += vel
+
 
     win.fill((0, 0, 0))
     pygame.draw.rect(win, (255, 0, 0), (x, y, width, height))
