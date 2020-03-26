@@ -1,6 +1,9 @@
 import pygame
 import math
 import random
+import neat
+import os
+
 pygame.init()
 
 
@@ -47,6 +50,35 @@ class player(object):
         self.distance = 0
         self.hitbox = pygame.Rect(self.x + 80, self.y + 30, 70, 115)
 
+    def toggle_jump(self):
+        self.is_jump = True
+        self.is_run = False
+        self.is_slide = False
+
+    def jump(self):
+        if self.jump_count >= -8:
+            neg = 1
+            if(self.jump_count < 0):
+                neg = -1
+            self.y -= (self.jump_count ** 2) * neg * 0.5
+            self.jump_count -= 1
+        else:
+            self.is_jump = False
+            self.is_run = True
+            self.jump_count = 8
+
+    def toggle_slide(self):
+        self.is_slide = True
+        self.is_jump = False   
+        self.is_run = False
+
+    def stop_slide(self):
+        self.is_slide = False
+        self.is_run = True
+    
+    def increment_distance(self):
+        self.distance += 1
+
     def draw(self, win):
         if self.is_run: 
             self.hitbox = pygame.Rect(self.x + 80, self.y + 30, 70, 115)
@@ -89,10 +121,10 @@ class obstacle(object):
         else:
             self.hitbox = pygame.Rect(self.x, self.y, 75, 75)
         win.blit(self.obst, (self.x, self.y))
-        obstacle_hitboxes.append(self.hitbox)
+        return self.hitbox
         #pygame.draw.rect(win, (255,0,0), self.hitbox, 2)
 
-def redraw_game_window():
+def redraw_game_window(char, obstacles, obstacle_hitboxes):
     score = font_24.render("SCORE  " + str(char.distance), True, (255,255,255))
     score_rect = score.get_rect()
     score_rect.center = (1100, 100)
@@ -101,25 +133,8 @@ def redraw_game_window():
     win.blit(score, score_rect)
     char.draw(win)
     for obst in obstacles:
-        obst.draw(win)
+        obstacle_hitboxes.append(obst.draw(win))
     pygame.display.update()
-
-def game_intro():
-    intro = True
-    while intro:
-        win.blit(bg, (0,0))
-        win.blit(gamename, gamename_rect)
-        win.blit(gamestart, gamestart_rect)
-        pygame.display.update()
-
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                quit()
-            if event.type == pygame.KEYDOWN:
-                intro = False
-        
-
 
 def game_loop():
     running = True
@@ -130,6 +145,9 @@ def game_loop():
     pygame.time.set_timer(pygame.USEREVENT+4, random.randrange(650, 800))
     pygame.time.set_timer(pygame.USEREVENT+5, random.randrange(650, 700))
     difficulty = 0
+    char = player(300, WIN_HEIGHT - 228, 200, 148)
+    obstacles = []
+    obstacle_hitboxes = []
     while running:
         #frame rate
         clock.tick(30)
@@ -143,7 +161,7 @@ def game_loop():
             bg_x = bg.get_width()
         if bg_x2 < bg.get_width() * -1:
             bg_x2 = bg.get_width()
-        char.distance += 1
+        char.increment_distance()
         
         difficulty = char.distance // 500
 
@@ -153,8 +171,7 @@ def game_loop():
                 pygame.quit()
                 quit()
             elif event.type == pygame.KEYUP and char.is_slide:
-                char.is_slide = False
-                char.is_run = True
+                char.stop_slide()
             elif event.type == pygame.USEREVENT + difficulty:
                 rand = random.randint(0, 1)
                 if rand == 0:
@@ -175,58 +192,28 @@ def game_loop():
         #player input
         keys = pygame.key.get_pressed()
         if not(char.is_jump) and keys[pygame.K_SPACE]:
-            char.is_jump = True
-            char.is_run = False
-            char.is_slide = False
+            char.toggle_jump()
         elif char.is_jump:
-            if char.jump_count >= -8:
-                neg = 1
-                if(char.jump_count < 0):
-                    neg = -1
-                char.y -= (char.jump_count ** 2) * neg * 0.5
-                char.jump_count -= 1
-            else:
-                char.is_jump = False
-                char.is_run = True
-                char.jump_count = 8
+            char.jump()
         if not(char.is_slide) and not(char.is_jump) and keys[pygame.K_DOWN]:
-            char.is_slide = True
-            char.is_jump = False   
-            char.is_run = False
+            char.toggle_slide()
         
 
         #redraw function
-        redraw_game_window()
+        redraw_game_window(char, obstacles, obstacle_hitboxes)
 
-def game_end():
-    end = True
-    while end:
-        win.fill((0,0,0))
-        msg = ""
-        if char.distance >= 3000:
-            msg = "CONGRATULATIONS"
-        else:
-            msg = "YOU DIED"
-        end_msg = font_64.render(msg, True, (255,255,255))
-        end_msg_rect = end_msg.get_rect()
-        end_msg_rect.center = (1280 // 2, 720 // 2)
-        score = font_24.render("YOUR SCORE WAS " + str(char.distance), True, (255,255,255))
-        score_rect = score.get_rect()
-        score_rect.center = (1280 // 2, 720 * 2 // 3)
-        win.blit(end_msg, end_msg_rect)
-        win.blit(score, score_rect)
-        pygame.display.update()
-        
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT or event.type == pygame.KEYDOWN:
-                pygame.quit()
-                quit()
-
-
-game_intro()
-char = player(300, WIN_HEIGHT - 228, 200, 148)
-obstacles = []
-obstacle_hitboxes = []
 game_loop()
-game_end()
 pygame.quit()
+
+def run(config_path):
+    config = neat.config.Config(neat.DefaultGenome, neat.DefaultReproduction, neat.DefaultSpeciesSet, neat.DefaultStagnation, config_path)
+    p = neat.Population(config)
+    p.add_reporter(neat.StdOutReporter(True))
+    stats = neat.StatisticsReporter()
+    p.add_reporter(stats)
+    winner = p.run(game_loop(), 50)
+
+if __name__ == "__main__":
+    local_dir = os.path.dirname(__file__)
+    config_path = os.path.join(local_dir, "config-feedforward.txt")
+    run(config_path)
