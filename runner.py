@@ -15,41 +15,48 @@ bg = pygame.transform.scale(bg, (1280, 720))
 
 clock = pygame.time.Clock()
 
+class player(object):
+    def __init__(self, x, y, width, height):
+        self.x = x
+        self.y = y
+        self.width = width
+        self.height = height
+        self.is_jump = False
+        self.jump_count = 8
+        self.is_run = True
+        self.is_slide = False
+        self.distance = 0
+        self.run_frame = 0
+        self.jump_frame = 0
+
+    def draw(self, win):
+        if self.is_run: 
+            if self.run_frame + 1 >= 18:
+                self.run_frame = 0
+            win.blit(run[self.run_frame//3], (self.x, self.y))
+            self.run_frame += 1
+        if self.is_jump:
+            if self.jump_frame + 1 >= 18:
+                self.jump_frame = 0
+            win.blit(jump[self.jump_frame//3], (self.x, self.y))
+            self.jump_frame += 1
+
+
+"""
 width = 200
 height = 148
 x = 300
 y = WIN_HEIGHT - height - 80
-vel = 20
-
-is_run = True
-is_jump = False
-jump_count = 8
-
-distance = 0
-
-is_slide = False
-
-run_frame = 0
-jump_frame = 0
+"""
 
 def redraw_game_window():
-    global run_frame
-    global jump_frame
     win.blit(bg, (0,0))
-    if is_run: 
-        if run_frame + 1 >= 18:
-            run_frame = 0
-        win.blit(run[run_frame//3], (x,y))
-        run_frame += 1
-    if is_jump:
-        if jump_frame + 1 >= 18:
-            jump_frame = 0
-        win.blit(jump[jump_frame//3], (x,y))
-        jump_frame += 1
+    char.draw(win)
     pygame.display.update()
 
 
 running = True
+char = player(300, WIN_HEIGHT - 228, 200, 148)
 while running:
     clock.tick(30)
     for event in pygame.event.get():
@@ -57,20 +64,20 @@ while running:
             running = False
     
     keys = pygame.key.get_pressed()
-    if not(is_jump) and keys[pygame.K_SPACE]:
-        is_jump = True
-        is_run = False
-    elif is_jump:
-        if jump_count >= -8:
+    if not(char.is_jump) and keys[pygame.K_SPACE]:
+        char.is_jump = True
+        char.is_run = False
+    elif char.is_jump:
+        if char.jump_count >= -8:
             neg = 1
-            if(jump_count < 0):
+            if(char.jump_count < 0):
                 neg = -1
-            y -= (jump_count ** 2) * neg
-            jump_count -= 1
+            char.y -= (char.jump_count ** 2) * neg
+            char.jump_count -= 1
         else:
-            is_jump = False
-            is_run = True
-            jump_count = 8
+            char.is_jump = False
+            char.is_run = True
+            char.jump_count = 8
     redraw_game_window()
 
 pygame.quit()
