@@ -1,6 +1,6 @@
 # Runner Machine Learning
 
-An AI learning how to play a simplified version of my Runner game using the NEAT python module.
+An AI learning how to play a simplified version of [my Runner game](https://github.com/brianlqiu/Runner) using the NEAT python module.
 
 ## Notes
 
