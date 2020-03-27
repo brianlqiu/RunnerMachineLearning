@@ -9,3 +9,5 @@ In this version of Runner, the sign obstacles are removed and the AI is only tra
 The AI tends to work best when obstacles are generated far enough apart so that excessive jumping is punished. 
 Since the distance between obstacles is linked to the frame rate, the obstacle generation timing will have to be adjusted according to the
 capabilities of every machine.
+
+The farther the obstacles are generated from one another, the faster the AI learns.
